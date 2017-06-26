@@ -1,0 +1,31 @@
+version: '3'
+services:
+  razor:
+    build: ./centos7-server
+    ports:
+    - "8150:8150"
+    networks:
+      - razor
+    depends_on:
+      - postgres
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
+    tty: true
+  postgres:
+    environment:
+      - POSTGRES_USER=razor
+      - POSTGRES_PASSWORD=mypass
+      - POSTGRES_DB=razor_prd
+    build: ./postgres
+    volumes:
+      - postgres-razor-db:/var/lib/postgresql/data
+    networks:
+      - razor
+    expose:
+       - "5432"
+volumes:
+  postgres-razor-db: {}
+networks:
+  razor:
