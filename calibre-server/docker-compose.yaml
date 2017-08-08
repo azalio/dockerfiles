@@ -1,0 +1,31 @@
+version: '3'
+services:
+  calibre-server:
+    image: azalio/calibre-server
+    ports:
+      - "127.0.0.1:8080:8080"
+    expose:
+      - "8080"
+    networks:
+      - calibre
+    volumes:
+      - calibre-volume:/calibre-lib
+    restart: always
+  calibre-web:
+    image: technosoft2000/calibre-web
+    depends_on:
+      - calibre-server
+    environment:
+      - SET_CONTAINER_TIMEZONE=true
+      - CONTAINER_TIMEZONE=Europe/Moscow
+    ports:
+      - "8383:8083"
+    volumes:
+      - calibre-volume:/books
+    networks:
+      - calibre
+    restart: always
+volumes:
+  calibre-volume: {}
+networks:
+  calibre:
