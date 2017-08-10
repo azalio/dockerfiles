@@ -14,15 +14,16 @@
 # razor-client installed somewhere to interact with this container.
 #
 
-FROM tianon/centos:6.5
+FROM centos:6
+MAINTAINER Mikhail Petrov <azalio@azalio.net>
+
+ENV REFRESHED_AT 2017-06-20-11:30
 
 RUN  yum -y update
 
-RUN  rpm -ivh https://yum.puppetlabs.com/el/6/products/x86_64/puppetlabs-release-6-10.noarch.rpm && \
-     yum install -y puppet tar
+RUN  rpm -ivh https://yum.puppetlabs.com/puppetlabs-release-el-6.noarch.rpm && \
+    yum install -y puppet tar wget
 
-ADD  razor-postgres-install.pp /
-ADD  start.sh /
 
 ENV  HOSTNAME       razor-server
 ENV  TORQUEBOX_HOME /opt/razor-torquebox
@@ -31,12 +32,12 @@ ENV  JRUBY_HOME     $TORQUEBOX_HOME/jruby
 ENV  PATH           $JRUBY_HOME/bin:$PATH
 
 RUN  puppet module install puppetlabs/postgresql
-RUN  puppet module install puppetlabs/razor
-RUN  puppet apply -e 'include razor'
+EXPOSE    8150
 
-# 69      TFTP
-# 8080	Torquebox API
-EXPOSE    8080
-
+RUN  yum install -y razor-server
+ADD  razor-postgres-install.pp /
+RUN  puppet apply /razor-postgres-install.pp
+ADD  start.sh /
 RUN  chmod +x /start.sh
+
 CMD  ["/start.sh"]
